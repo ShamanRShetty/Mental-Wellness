@@ -1,20 +1,18 @@
 const Session = require('../models/Session');
-const { generateSessionId, isValidSessionId } = require('../utils/sessionUtils');
 const { generateAIResponse, generateContextualGreeting, detectMessageIntent } = require('../services/aiService');
 const { detectCrisis, getCrisisResponse, analyzeTrend } = require('../services/crisisDetection');
 const { analyzeSentiment } = require('../services/sentimentService');
+const { v4: uuidv4 } = require('uuid');
 
 /**
  * Initialize a new chat session
  */
 async function initializeSession(req, res) {
   try {
-    // Generate new session ID
-    const sessionId = generateSessionId();
+    const sessionId = uuidv4(); // generate unique session id
 
-    // Create new session in database
-    const session = new Session({
-      sessionId,
+    const session = await Session.create({
+      sessionId, // assign it here
       conversationHistory: [],
       moodEntries: [],
       preferences: {
@@ -22,9 +20,6 @@ async function initializeSession(req, res) {
       }
     });
 
-    await session.save();
-
-    // Generate greeting
     const greeting = generateContextualGreeting();
 
     res.json({
@@ -58,7 +53,7 @@ async function sendMessage(req, res) {
       });
     }
 
-    if (!isValidSessionId(sessionId)) {
+    if (!sessionId || sessionId.length < 10) {
       return res.status(400).json({
         success: false,
         error: 'Invalid session ID'
@@ -223,7 +218,7 @@ async function clearHistory(req, res) {
   try {
     const { sessionId } = req.body;
 
-    if (!isValidSessionId(sessionId)) {
+    if (!sessionId || sessionId.length < 10) {
       return res.status(400).json({
         success: false,
         error: 'Invalid session ID'

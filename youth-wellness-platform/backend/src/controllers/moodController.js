@@ -1,5 +1,5 @@
 const Session = require('../models/Session');
-const { isValidSessionId } = require('../utils/sessionUtils');
+const { generateSessionId, isValidSessionId } = require('../utils/sessionUtils');
 const { analyzeSentimentTrend } = require('../services/sentimentService');
 const { generateAIResponse } = require('../services/aiService');
 

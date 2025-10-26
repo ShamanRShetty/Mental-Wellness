@@ -1,186 +1,120 @@
-const { crisisResponses } = require('../utils/responseTemplates');
+/**
+ * Basic sentiment analysis
+ * (We'll replace this with Google Cloud NLP API later)
+ */
+
+const POSITIVE_WORDS = [
+  'happy', 'joy', 'excited', 'grateful', 'thankful', 'blessed',
+  'wonderful', 'amazing', 'great', 'excellent', 'love', 'better',
+  'improved', 'progress', 'hopeful', 'proud', 'accomplished'
+];
+
+const NEGATIVE_WORDS = [
+  'sad', 'depressed', 'anxious', 'worried', 'scared', 'afraid',
+  'hopeless', 'worthless', 'lonely', 'isolated', 'stressed',
+  'overwhelmed', 'exhausted', 'tired', 'frustrated', 'angry',
+  'hate', 'terrible', 'awful', 'worse', 'failed'
+];
 
 /**
- * Crisis keywords categorized by severity
+ * Analyze sentiment of a message
+ * @param {string} text - Message to analyze
+ * @returns {Object} - Sentiment analysis result
  */
-const CRISIS_KEYWORDS = {
-  critical: [
-    'suicide', 'kill myself', 'end my life', 'want to die',
-    'better off dead', 'suicide plan', 'going to kill',
-    'आत्महत्या', 'मरना चाहता', 'जीना नहीं चाहता' // Hindi
-  ],
-  high: [
-    'self harm', 'cut myself', 'hurt myself', 'harm myself',
-    'don\'t want to live', 'can\'t go on', 'no point living',
-    'खुद को नुकसान', 'खुद को चोट' // Hindi
-  ],
-  medium: [
-    'hopeless', 'worthless', 'no one cares', 'hate myself',
-    'give up', 'can\'t take it anymore', 'overwhelming'
-  ]
-};
+function analyzeSentiment(text) {
+  const lowerText = text.toLowerCase();
+  const words = lowerText.split(/\s+/);
 
-/**
- * Detect crisis level in user message
- * @param {string} message - User's message
- * @returns {Object} - Crisis detection result
- */
-function detectCrisis(message) {
-  const lowerMessage = message.toLowerCase();
-  let severity = 'none';
-  let detectedKeywords = [];
-  let score = 0;
+  let positiveCount = 0;
+  let negativeCount = 0;
 
-  // Check critical keywords
-  for (const keyword of CRISIS_KEYWORDS.critical) {
-    if (lowerMessage.includes(keyword.toLowerCase())) {
-      severity = 'critical';
-      detectedKeywords.push(keyword);
-      score += 3;
+  // Count positive and negative words
+  words.forEach(word => {
+    if (POSITIVE_WORDS.some(pw => word.includes(pw))) {
+      positiveCount++;
     }
-  }
-
-  // Check high severity keywords if not already critical
-  if (severity !== 'critical') {
-    for (const keyword of CRISIS_KEYWORDS.high) {
-      if (lowerMessage.includes(keyword.toLowerCase())) {
-        severity = 'high';
-        detectedKeywords.push(keyword);
-        score += 2;
-      }
-    }
-  }
-
-  // Check medium severity keywords
-  if (severity === 'none') {
-    for (const keyword of CRISIS_KEYWORDS.medium) {
-      if (lowerMessage.includes(keyword.toLowerCase())) {
-        severity = 'medium';
-        detectedKeywords.push(keyword);
-        score += 1;
-      }
-    }
-  }
-
-  // Sentiment-based detection
-  const negativeWords = ['sad', 'depressed', 'anxious', 'lonely', 'scared', 'afraid'];
-  const negativeCount = negativeWords.filter(word => 
-    lowerMessage.includes(word)
-  ).length;
-
-  if (negativeCount >= 3 && severity === 'none') {
-    severity = 'low';
-    score += 0.5;
-  }
-
-  return {
-    isCrisis: severity !== 'none',
-    severity,
-    score,
-    keywords: detectedKeywords,
-    timestamp: new Date()
-  };
-}
-
-/**
- * Get appropriate crisis response based on severity
- * @param {string} severity - Crisis severity level
- * @returns {Object} - Crisis response with resources
- */
-function getCrisisResponse(severity) {
-  if (severity === 'critical' || severity === 'high') {
-    return {
-      severity,
-      message: crisisResponses.high.message,
-      helplines: crisisResponses.high.helplines,
-      urgentActions: crisisResponses.high.urgentActions,
-      showEmergencyButton: true
-    };
-  } else if (severity === 'medium') {
-    return {
-      severity,
-      message: crisisResponses.medium.message,
-      resources: crisisResponses.medium.resources,
-      showEmergencyButton: false
-    };
-  } else if (severity === 'low') {
-    return {
-      severity,
-      message: crisisResponses.low.message,
-      suggestions: crisisResponses.low.suggestions,
-      showEmergencyButton: false
-    };
-  }
-
-  return null;
-}
-
-/**
- * Analyze conversation history for deteriorating mental state
- * @param {Array} conversationHistory - Recent conversation messages
- * @returns {Object} - Trend analysis
- */
-function analyzeTrend(conversationHistory) {
-  if (!conversationHistory || conversationHistory.length < 5) {
-    return { trend: 'neutral', confidence: 'low' };
-  }
-
-  // Analyze last 10 messages
-  const recentMessages = conversationHistory.slice(-10);
-  let crisisScore = 0;
-  let totalMessages = 0;
-
-  recentMessages.forEach((msg, index) => {
-    if (msg.role === 'user') {
-      totalMessages++;
-      const detection = detectCrisis(msg.content);
-      
-      // Weight recent messages more heavily
-      const weight = (index + 1) / recentMessages.length;
-      crisisScore += detection.score * weight;
+    if (NEGATIVE_WORDS.some(nw => word.includes(nw))) {
+      negativeCount++;
     }
   });
 
-  const avgScore = crisisScore / totalMessages;
+  // Calculate sentiment score (-1 to 1)
+  const totalSentimentWords = positiveCount + negativeCount;
+  let score = 0;
 
-  let trend = 'neutral';
-  let confidence = 'medium';
-
-  if (avgScore > 2) {
-    trend = 'worsening';
-    confidence = 'high';
-  } else if (avgScore > 1) {
-    trend = 'concerning';
-    confidence = 'medium';
-  } else if (avgScore > 0.5) {
-    trend = 'monitoring';
-    confidence = 'low';
-  } else {
-    trend = 'stable';
-    confidence = 'medium';
+  if (totalSentimentWords > 0) {
+    score = (positiveCount - negativeCount) / totalSentimentWords;
   }
+
+  // Calculate magnitude (0 to 1) - how strong the emotion is
+  const magnitude = totalSentimentWords / words.length;
+
+  // Determine overall sentiment
+  let sentiment = 'neutral';
+  if (score > 0.3) sentiment = 'positive';
+  else if (score > 0.1) sentiment = 'slightly_positive';
+  else if (score < -0.3) sentiment = 'negative';
+  else if (score < -0.1) sentiment = 'slightly_negative';
+
+  return {
+    score, // -1 (very negative) to 1 (very positive)
+    magnitude, // 0 (no emotion) to 1 (very emotional)
+    sentiment, // 'positive', 'negative', 'neutral', etc.
+    positiveCount,
+    negativeCount,
+    confidence: Math.abs(score) // How confident we are
+  };
+}
+
+/**
+ * Analyze sentiment trend over multiple messages
+ * @param {Array} messages - Array of messages with timestamps
+ * @returns {Object} - Trend analysis
+ */
+function analyzeSentimentTrend(messages) {
+  if (!messages || messages.length === 0) {
+    return {
+      trend: 'neutral',
+      avgScore: 0,
+      improvement: 0
+    };
+  }
+
+  const sentiments = messages.map(msg => {
+    const analysis = analyzeSentiment(msg.content);
+    return {
+      ...analysis,
+      timestamp: msg.timestamp
+    };
+  });
+
+  // Calculate average sentiment
+  const avgScore = sentiments.reduce((sum, s) => sum + s.score, 0) / sentiments.length;
+
+  // Calculate trend (comparing first half to second half)
+  const midPoint = Math.floor(sentiments.length / 2);
+  const firstHalf = sentiments.slice(0, midPoint);
+  const secondHalf = sentiments.slice(midPoint);
+
+  const firstAvg = firstHalf.reduce((sum, s) => sum + s.score, 0) / firstHalf.length;
+  const secondAvg = secondHalf.reduce((sum, s) => sum + s.score, 0) / secondHalf.length;
+
+  const improvement = secondAvg - firstAvg;
+
+  let trend = 'stable';
+  if (improvement > 0.2) trend = 'improving';
+  else if (improvement < -0.2) trend = 'declining';
 
   return {
     trend,
-    confidence,
     avgScore,
-    recommendation: getRecommendationBasedOnTrend(trend)
+    improvement,
+    recentSentiment: secondAvg,
+    details: sentiments
   };
-}
-
-function getRecommendationBasedOnTrend(trend) {
-  const recommendations = {
-    worsening: 'Consider reaching out to a professional counselor or therapist soon.',
-    concerning: 'It might be helpful to talk to a trusted friend or family member.',
-    monitoring: 'Keep checking in with yourself. You\'re doing well by talking about it.',
-    stable: 'You seem to be managing well. Keep up the self-care!'
-  };
-
-  return recommendations[trend] || recommendations.stable;
 }
 
 module.exports = {
-  detectCrisis,
-  getCrisisResponse,
-  analyzeTrend
+  analyzeSentiment,
+  analyzeSentimentTrend
 };

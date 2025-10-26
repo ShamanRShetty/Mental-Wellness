@@ -2,14 +2,14 @@ const Session = require('../models/Session');
 const { generateAIResponse, generateContextualGreeting, detectMessageIntent } = require('../services/aiService');
 const { detectCrisis, getCrisisResponse, analyzeTrend } = require('../services/crisisDetection');
 const { analyzeSentiment } = require('../services/sentimentService');
-const { v4: uuidv4 } = require('uuid');
+const { generateSessionId, isValidSessionId } = require('../utils/sessionUtils');
 
 /**
  * Initialize a new chat session
  */
 async function initializeSession(req, res) {
   try {
-    const sessionId = uuidv4(); // generate unique session id
+    const sessionId = generateSessionId();
 
     const session = await Session.create({
       sessionId, // assign it here

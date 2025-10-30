@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { customAlphabet } = require('nanoid');
+const Session = require('../models/Session');
 
 // -------------------- Resource Schema --------------------
 const resourceSchema = new mongoose.Schema({
@@ -26,7 +27,7 @@ const Resource = mongoose.models.Resource || mongoose.model("Resource", resource
 // -------------------- Session Utilities --------------------
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 16);
 
-// ✅ In-memory session store
+// ✅ In-memory store (still used for fast access)
 const activeSessions = new Map();
 
 function generateSessionId() {
@@ -35,23 +36,28 @@ function generateSessionId() {
   return sessionId;
 }
 
-function isValidSessionId(id) {
-  return activeSessions.has(id);
+// ✅ Persistent validation via MongoDB
+async function isValidSessionId(id) {
+  if (!id) return false;
+
+  // If active in memory, fast path
+  if (activeSessions.has(id)) return true;
+
+  // Check database for fallback
+  const exists = await Session.exists({ sessionId: id });
+  return !!exists;
 }
 
-// ✅ Optional: Get session object if needed later
 function getSession(id) {
   return activeSessions.get(id);
 }
 
-// ✅ Optional: Update session data
 function updateSession(id, data) {
   if (activeSessions.has(id)) {
     activeSessions.set(id, { ...activeSessions.get(id), ...data });
   }
 }
 
-// -------------------- Exports --------------------
 module.exports = {
   Resource,
   generateSessionId,

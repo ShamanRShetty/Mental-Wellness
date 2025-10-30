@@ -1,74 +1,86 @@
-import { useState } from 'react'
-import { Heart, MessageCircle, Shield } from 'lucide-react'
+import React, { useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { useApp } from './context/AppContext';
+import Header from './components/Layout/Header';
+import Footer from './components/Layout/Footer';
+import Loading from './components/UI/Loading';
+import { initializeSession } from './services/api';
+
+// Pages
+import Home from './pages/Home';
+import Chat from './pages/Chat';
+import MoodTracker from './pages/MoodTracker';
+import Resources from './pages/Resources';
+import Settings from './pages/Settings';
 
 function App() {
-  const [apiStatus, setApiStatus] = useState('Checking...')
+  const { loading } = useApp();
 
-  // Test backend connection
-  const checkBackend = async () => {
-    try {
-      const response = await fetch('http://localhost:8080')
-      const data = await response.json()
-      setApiStatus(data.message)
-    } catch (error) {
-      setApiStatus('Backend not connected')
+  // ✅ Initialize session on first app load
+  useEffect(() => {
+    async function setupSession() {
+      try {
+        const data = await initializeSession();
+        localStorage.setItem('sessionId', data.sessionId);
+        console.log('✅ Session initialized:', data.sessionId);
+      } catch (error) {
+        console.error('❌ Failed to initialize session:', error);
+      }
     }
+
+    // Only create session if one doesn’t exist
+    const existingSession = localStorage.getItem('sessionId');
+    if (!existingSession) {
+      setupSession();
+    } else {
+      console.log('🔁 Existing session found:', existingSession);
+    }
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loading size="lg" text="Initializing MindCare..." />
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-800 mb-4">
-            Youth Mental Wellness Platform
-          </h1>
-          <p className="text-xl text-gray-600">
-            Your safe space for mental health support
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <Shield className="w-12 h-12 text-blue-500 mb-4 mx-auto" />
-            <h3 className="text-lg font-semibold mb-2">100% Anonymous</h3>
-            <p className="text-gray-600">Your privacy is our priority</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <MessageCircle className="w-12 h-12 text-purple-500 mb-4 mx-auto" />
-            <h3 className="text-lg font-semibold mb-2">AI Companion</h3>
-            <p className="text-gray-600">24/7 empathetic support</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <Heart className="w-12 h-12 text-pink-500 mb-4 mx-auto" />
-            <h3 className="text-lg font-semibold mb-2">Culturally Aware</h3>
-            <p className="text-gray-600">Understanding Indian youth</p>
-          </div>
-        </div>
-
-        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4 text-center">System Status</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span>Frontend:</span>
-              <span className="text-green-500 font-semibold">✓ Running</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Backend:</span>
-              <span className="font-semibold">{apiStatus}</span>
-            </div>
-            <button
-              onClick={checkBackend}
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
-            >
-              Check Backend Connection
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/mood" element={<MoodTracker />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/settings" element={<Settings />} />
+          {/* 404 Page */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      <Footer />
     </div>
-  )
+  );
 }
 
-export default App
+// 404 Not Found Component
+const NotFound = () => {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-gray-800 mb-4">404</h1>
+        <p className="text-xl text-gray-600 mb-8">Page not found</p>
+
+        <a
+          href="/"
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        >
+          Go Home
+        </a>
+      </div>
+    </div>
+  );
+};
+
+export default App;

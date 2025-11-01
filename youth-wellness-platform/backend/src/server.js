@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const journalRoutes = require('./routes/journalRoutes');
 
 // Import routes
 const chatRoutes = require('./routes/chatRoutes');
@@ -40,6 +41,7 @@ app.get('/', (req, res) => {
 app.use('/api/chat', chatRoutes);
 app.use('/api/mood', moodRoutes);
 app.use('/api/resources', resourceRoutes);
+app.use('/api/journal', journalRoutes);
 
 // 404 handler
 app.use((req, res) => {

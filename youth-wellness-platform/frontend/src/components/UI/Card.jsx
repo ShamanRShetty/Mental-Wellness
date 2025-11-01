@@ -5,7 +5,8 @@ const Card = ({ children, className = '', hover = false, ...props }) => {
   return (
     <div
       className={clsx(
-        'bg-white rounded-lg shadow-md p-6',
+        // ✅ Supports light + dark mode
+        'bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text rounded-lg shadow-md p-6',
         hover && 'transition-shadow hover:shadow-lg cursor-pointer',
         className
       )}

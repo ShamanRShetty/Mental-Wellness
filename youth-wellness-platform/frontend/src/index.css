@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------
+   Base Reset & Typography
+------------------------------ */
 * {
   margin: 0;
   padding: 0;
@@ -14,46 +17,87 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f9fafb;
+  color: #1f2937;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Custom Scrollbar */
+/* ------------------------------
+   Dark Mode Base
+------------------------------ */
+.dark body {
+  background-color: #0f172a; /* deep slate bg */
+  color: #e2e8f0;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ------------------------------
+   Scrollbar Styling
+------------------------------ */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f3f4f6;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a0aec0;
+  background: #94a3b8;
 }
 
-/* Smooth scroll behavior */
-html {
-  scroll-behavior: smooth;
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
 }
 
-/* Input range slider styling */
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* ------------------------------
+   Range Slider
+------------------------------ */
 input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: #e5e7eb;
+  outline: none;
+}
+
+.dark input[type='range'] {
+  background: #334155;
 }
 
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none;
   width: 20px;
   height: 20px;
   background: #3b82f6;
   cursor: pointer;
   border-radius: 50%;
+  border: 2px solid white;
+  transition: background 0.2s ease;
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+  background: #2563eb;
 }
 
 input[type='range']::-moz-range-thumb {
@@ -62,20 +106,29 @@ input[type='range']::-moz-range-thumb {
   background: #3b82f6;
   cursor: pointer;
   border-radius: 50%;
-  border: none;
+  border: 2px solid white;
+  transition: background 0.2s ease;
 }
 
-/* Focus visible for accessibility */
+input[type='range']::-moz-range-thumb:hover {
+  background: #2563eb;
+}
+
+/* ------------------------------
+   Focus & Accessibility
+------------------------------ */
 *:focus-visible {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
 
-/* Animation for fade in */
+/* ------------------------------
+   Animations
+------------------------------ */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -87,10 +140,86 @@ input[type='range']::-moz-range-thumb {
   animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Gradient text */
+/* ------------------------------
+   Gradient Text
+------------------------------ */
 .gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* ------------------------------
+   Card & Container Theming
+------------------------------ */
+.dark .bg-white {
+  background-color: #1e293b !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #0f172a !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1e293b !important;
+}
+
+.dark .text-gray-800 {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .border-gray-200 {
+  border-color: #334155 !important;
+}
+
+.dark .shadow-md {
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.6) !important;
+}
+
+/* ------------------------------
+   Buttons & Interactive Elements
+------------------------------ */
+button {
+  transition: background-color 0.2s ease, color 0.2s ease, border 0.2s ease;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dark button {
+  color: #e2e8f0;
+}
+
+.dark a {
+  color: #60a5fa;
+}
+
+.dark a:hover {
+  color: #93c5fd;
+}
+
+/* ------------------------------
+   Utility: Glass Effect for Pro Cards
+------------------------------ */
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.light .glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(209, 213, 219, 0.2);
 }

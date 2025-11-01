@@ -9,8 +9,12 @@ const Loading = ({ size = 'md', text = '' }) => {
 
   return (
     <div className="flex flex-col items-center justify-center p-8">
-      <div className={`animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 ${sizes[size]}`} />
-      {text && <p className="mt-4 text-gray-600">{text}</p>}
+      <div
+        className={`animate-spin rounded-full border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 ${sizes[size]}`}
+      />
+      {text && (
+        <p className="mt-4 text-gray-600 dark:text-gray-300">{text}</p>
+      )}
     </div>
   );
 };

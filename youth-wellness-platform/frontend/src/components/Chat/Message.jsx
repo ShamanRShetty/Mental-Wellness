@@ -23,15 +23,15 @@ const Message = ({ message }) => {
       {/* Message Content */}
       <div className={`flex-1 ${isUser ? 'text-right' : ''}`}>
         <div
-          className={`inline-block max-w-[80%] px-4 py-3 rounded-lg ${
+          className={`inline-block max-w-[80%] px-4 py-3 rounded-lg transition-colors duration-200 ${
             isUser
               ? 'bg-blue-600 text-white rounded-tr-none'
-              : 'bg-gray-100 text-gray-800 rounded-tl-none'
+              : 'bg-gray-100 text-gray-800 rounded-tl-none dark:bg-gray-800 dark:text-gray-100'
           }`}
         >
           <p className="whitespace-pre-wrap break-words">{message.content}</p>
         </div>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
           {formatTime(message.timestamp)}
         </p>
       </div>

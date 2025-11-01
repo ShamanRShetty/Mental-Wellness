@@ -6,31 +6,31 @@ const Alert = ({ type = 'info', title, message, onClose }) => {
   const config = {
     info: {
       icon: Info,
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-      textColor: 'text-blue-800',
-      iconColor: 'text-blue-600',
+      bgColor: 'bg-blue-50 dark:bg-blue-950',
+      borderColor: 'border-blue-200 dark:border-blue-800',
+      textColor: 'text-blue-800 dark:text-blue-200',
+      iconColor: 'text-blue-600 dark:text-blue-400',
     },
     success: {
       icon: CheckCircle,
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-      textColor: 'text-green-800',
-      iconColor: 'text-green-600',
+      bgColor: 'bg-green-50 dark:bg-green-950',
+      borderColor: 'border-green-200 dark:border-green-800',
+      textColor: 'text-green-800 dark:text-green-200',
+      iconColor: 'text-green-600 dark:text-green-400',
     },
     warning: {
       icon: AlertCircle,
-      bgColor: 'bg-yellow-50',
-      borderColor: 'border-yellow-200',
-      textColor: 'text-yellow-800',
-      iconColor: 'text-yellow-600',
+      bgColor: 'bg-yellow-50 dark:bg-yellow-900',
+      borderColor: 'border-yellow-200 dark:border-yellow-700',
+      textColor: 'text-yellow-800 dark:text-yellow-100',
+      iconColor: 'text-yellow-600 dark:text-yellow-300',
     },
     error: {
       icon: XCircle,
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200',
-      textColor: 'text-red-800',
-      iconColor: 'text-red-600',
+      bgColor: 'bg-red-50 dark:bg-red-950',
+      borderColor: 'border-red-200 dark:border-red-800',
+      textColor: 'text-red-800 dark:text-red-200',
+      iconColor: 'text-red-600 dark:text-red-400',
     },
   };
 
@@ -45,7 +45,7 @@ const Alert = ({ type = 'info', title, message, onClose }) => {
           <p className={clsx('text-sm', textColor)}>{message}</p>
         </div>
         {onClose && (
-          <button onClick={onClose} className={clsx('ml-4', textColor)}>
+          <button onClick={onClose} className={clsx('ml-4', textColor, 'hover:opacity-80')}>
             <XCircle size={20} />
           </button>
         )}

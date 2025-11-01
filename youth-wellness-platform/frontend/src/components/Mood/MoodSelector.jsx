@@ -5,7 +5,6 @@ const moods = ['very_sad', 'sad', 'neutral', 'happy', 'very_happy'];
 
 const MoodSelector = ({ selectedMood, onSelect }) => {
   const handleSelect = (mood) => {
-    // Just select the mood — do NOT call any log API here
     onSelect(mood);
   };
 
@@ -24,12 +23,12 @@ const MoodSelector = ({ selectedMood, onSelect }) => {
                         transition-all duration-200 hover:scale-[1.03]
                         ${
                           selectedMood === mood
-                            ? 'border-blue-500 bg-blue-50 scale-105'
-                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-100'
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 dark:border-blue-400 scale-105'
+                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700'
                         }`}
           >
             <span className="text-3xl sm:text-4xl">{getMoodEmoji(mood)}</span>
-            <span className="text-[11px] sm:text-sm font-medium text-gray-700 leading-tight text-center">
+            <span className="text-[11px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 leading-tight text-center">
               {getMoodLabel(mood)}
             </span>
           </button>
@@ -49,12 +48,12 @@ const MoodSelector = ({ selectedMood, onSelect }) => {
                         transition-all duration-200 hover:scale-[1.03]
                         ${
                           selectedMood === mood
-                            ? 'border-blue-500 bg-blue-50 scale-105'
-                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-100'
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 dark:border-blue-400 scale-105'
+                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700'
                         }`}
           >
             <span className="text-3xl sm:text-4xl">{getMoodEmoji(mood)}</span>
-            <span className="text-[11px] sm:text-sm font-medium text-gray-700 leading-tight text-center">
+            <span className="text-[11px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 leading-tight text-center">
               {getMoodLabel(mood)}
             </span>
           </button>

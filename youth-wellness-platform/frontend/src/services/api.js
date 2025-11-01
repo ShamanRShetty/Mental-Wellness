@@ -142,4 +142,64 @@ export const getEmergencyHelplines = async () => {
   return response.data;
 };
 
+// ============================================
+// JOURNAL ENDPOINTS (🆕 Added)
+// ============================================
+
+/**
+ * Create a journal entry
+ */
+export const createJournalEntry = async (entryData) => {
+  const sessionId = getSessionId();
+  if (!sessionId) throw new Error("Session ID missing — please refresh.");
+
+  const payload = { sessionId, ...entryData };
+  const response = await api.post("/journal", payload);
+  return response.data;
+};
+
+/**
+ * Get all journal entries
+ */
+export const getJournalEntries = async (limit = 10, skip = 0) => {
+  const sessionId = getSessionId();
+  if (!sessionId) throw new Error("Session ID missing — please refresh.");
+
+  const params = { limit, skip };
+  const response = await api.get(`/journal/${sessionId}`, { params });
+  return response.data;
+};
+
+/**
+ * Get single journal entry
+ */
+export const getJournalEntry = async (id) => {
+  const response = await api.get(`/journal/entry/${id}`);
+  return response.data;
+};
+
+/**
+ * Update journal entry
+ */
+export const updateJournalEntry = async (id, updates) => {
+  const response = await api.put(`/journal/${id}`, updates);
+  return response.data;
+};
+
+/**
+ * Delete journal entry
+ */
+export const deleteJournalEntry = async (id) => {
+  const response = await api.delete(`/journal/${id}`);
+  return response.data;
+};
+
+/**
+ * Get random journal prompts
+ */
+export const getJournalPrompts = async () => {
+  const response = await api.get("/journal/prompts/random");
+  return response.data;
+};
+
 export default api;

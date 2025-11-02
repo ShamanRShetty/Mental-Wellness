@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
@@ -11,10 +11,12 @@ const VoiceInput = ({ onTranscript, disabled = false }) => {
     listening,
     resetTranscript,
     browserSupportsSpeechRecognition,
-    isMicrophoneAvailable
+    isMicrophoneAvailable,
+    finalTranscript,
   } = useSpeechRecognition();
 
-  // Supported languages
+  const isListeningRef = useRef(false);
+
   const languages = [
     { code: 'en-IN', name: 'English' },
     { code: 'hi-IN', name: 'हिंदी' },
@@ -31,21 +33,36 @@ const VoiceInput = ({ onTranscript, disabled = false }) => {
   }, [browserSupportsSpeechRecognition]);
 
   useEffect(() => {
-    if (transcript) {
-      onTranscript(transcript);
+    if (finalTranscript) {
+      onTranscript(finalTranscript);
+      resetTranscript();
     }
-  }, [transcript, onTranscript]);
+  }, [finalTranscript, onTranscript, resetTranscript]);
 
   const startListening = () => {
+    if (isListeningRef.current) return;
+
     resetTranscript();
+    isListeningRef.current = true;
+
     SpeechRecognition.startListening({
-      continuous: false,
+      continuous: true,
       language: languages[langIndex].code,
     });
   };
 
   const stopListening = () => {
+    if (!isListeningRef.current) return;
+    isListeningRef.current = false;
     SpeechRecognition.stopListening();
+  };
+
+  const toggleListening = () => {
+    if (listening) {
+      stopListening();
+    } else {
+      startListening();
+    }
   };
 
   const cycleLanguage = (e) => {
@@ -53,6 +70,11 @@ const VoiceInput = ({ onTranscript, disabled = false }) => {
     const nextIndex = (langIndex + 1) % languages.length;
     setLangIndex(nextIndex);
     setCurrentLanguage(languages[nextIndex].code);
+
+    if (listening) {
+      stopListening();
+      setTimeout(startListening, 100);
+    }
   };
 
   if (!isSupported) {
@@ -73,11 +95,11 @@ const VoiceInput = ({ onTranscript, disabled = false }) => {
 
   return (
     <div className="flex items-center gap-2">
-      
+
       {/* Microphone Button */}
       <button
         type="button"
-        onClick={listening ? stopListening : startListening}
+        onClick={toggleListening}
         disabled={disabled}
         className={`p-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
           listening
@@ -92,6 +114,9 @@ const VoiceInput = ({ onTranscript, disabled = false }) => {
       >
         {listening ? <MicOff size={20} /> : <Mic size={20} />}
       </button>
+
+      
+
     </div>
   );
 };

@@ -24,7 +24,7 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-bg transition-colors duration-300">
-        <Loading size="lg" text="Initializing MindCare..." />
+        <Loading size="lg" text="Initializing MindMirror..." />
       </div>
     );
   }
@@ -86,7 +86,7 @@ const NotFound = () => {
         </a>
       </div>
       <p className="mt-8 text-sm text-gray-500 dark:text-gray-400">
-        MindCare © {new Date().getFullYear()} — Your wellness companion 💙
+        MindMirror © {new Date().getFullYear()} — Your wellness companion 💙
       </p>
     </div>
   );

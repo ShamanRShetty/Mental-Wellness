@@ -1,8 +1,9 @@
 const Session = require('../models/Session');
-const { generateAIResponse, generateContextualGreeting, detectMessageIntent } = require('../services/aiService');
+const { generateAIResponse, generateContextualGreeting, detectMessageIntent } = require('../services/geminiService');
 const { detectCrisis, getCrisisResponse, analyzeTrend } = require('../services/crisisDetection');
 const { analyzeSentiment } = require('../services/sentimentService');
 const { generateSessionId, isValidSessionId } = require('../utils/sessionUtils');
+const { translateText } = require('../services/translationService');
 
 /**
  * Initialize a new chat session
@@ -12,7 +13,7 @@ async function initializeSession(req, res) {
     const sessionId = generateSessionId();
 
     const session = await Session.create({
-      sessionId, // assign it here
+      sessionId,
       conversationHistory: [],
       moodEntries: [],
       preferences: {
@@ -39,7 +40,7 @@ async function initializeSession(req, res) {
 }
 
 /**
- * Handle chat message
+ * Handle chat message with automatic language detection
  */
 async function sendMessage(req, res) {
   try {
@@ -53,7 +54,7 @@ async function sendMessage(req, res) {
       });
     }
 
-    if (!sessionId || sessionId.length < 10) {
+    if (!isValidSessionId(sessionId)) {
       return res.status(400).json({
         success: false,
         error: 'Invalid session ID'
@@ -71,7 +72,7 @@ async function sendMessage(req, res) {
     }
 
     // Analyze message sentiment
-    const sentiment = analyzeSentiment(message);
+    const sentiment = await analyzeSentiment(message);
 
     // Detect crisis
     const crisisDetection = detectCrisis(message);
@@ -90,9 +91,10 @@ async function sendMessage(req, res) {
       }
     });
 
-    // Generate AI response
+    // Generate AI response (with language detection)
     let aiResponse;
-    
+    let detectedLanguage = 'en';
+
     if (intent === 'greeting') {
       aiResponse = generateContextualGreeting();
     } else if (intent === 'gratitude') {
@@ -106,7 +108,9 @@ async function sendMessage(req, res) {
         content: msg.content
       }));
 
-      aiResponse = await generateAIResponse(message, conversationHistory);
+      const result = await generateAIResponse(message, conversationHistory);
+      aiResponse = result.message;
+      detectedLanguage = result.language || 'en';
     }
 
     // Add AI response to history
@@ -137,6 +141,7 @@ async function sendMessage(req, res) {
     const response = {
       success: true,
       message: aiResponse,
+      detectedLanguage, // include detected language
       sentiment: {
         userSentiment: sentiment.sentiment,
         score: sentiment.score

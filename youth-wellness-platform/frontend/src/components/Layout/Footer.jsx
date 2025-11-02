@@ -11,7 +11,7 @@ const Footer = () => {
             <div className="flex items-center space-x-2 mb-4">
               <Heart className="text-blue-600 dark:text-blue-400" size={24} />
               <span className="text-lg font-bold text-gray-800 dark:text-dark-text">
-                MindCare
+                MindMirror
               </span>
             </div>
             <p className="text-gray-600 dark:text-dark-muted text-sm">
@@ -66,10 +66,10 @@ const Footer = () => {
         </div>
 
         <div className="border-t dark:border-dark-border mt-8 pt-6 flex flex-col md:flex-row items-center justify-between text-sm text-gray-600 dark:text-dark-muted transition-colors duration-300">
-          <p>© 2024 MindCare. Made with ❤️ for Indian Youth</p>
+          <p>© 2024 MindMirror. Made with ❤️ for Indian Youth</p>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
             <a
-              href="mailto:support@mindcare.com"
+              href="mailto:support@MindMirror.com"
               className="hover:text-blue-600 dark:hover:text-blue-400"
             >
               <Mail size={20} />

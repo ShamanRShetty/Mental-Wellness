@@ -9,7 +9,7 @@ const journalRoutes = require('./routes/journalRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const moodRoutes = require('./routes/moodRoutes');
 const resourceRoutes = require('./routes/resourceRoutes');
-
+const translationRoutes = require('./routes/translationRoutes');
 // Load environment variables
 dotenv.config();
 
@@ -42,7 +42,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/mood', moodRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/journal', journalRoutes);
-
+app.use('/api/translate', translationRoutes);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({

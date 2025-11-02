@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Loader, AlertCircle } from 'lucide-react';
+import { Send, Loader, AlertCircle, Globe } from 'lucide-react'; // 🌍 Added Globe icon
 import { useApp } from '../context/AppContext';
 import { sendMessage, getConversationHistory } from '../services/api';
 import Message from '../components/Chat/Message';
 import CrisisAlert from '../components/Chat/CrisisAlert';
 import Button from '../components/UI/Button';
 import Loading from '../components/UI/Loading';
+import VoiceInput from '../components/Chat/VoiceInput';
+import 'regenerator-runtime/runtime';
 
 const Chat = () => {
   const { sessionId } = useApp();
@@ -15,48 +17,38 @@ const Chat = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState(null);
   const [crisisAlert, setCrisisAlert] = useState(null);
+  const [detectedLanguages, setDetectedLanguages] = useState([]);
+  const [selectedLang, setSelectedLang] = useState('en'); // ✅ Added
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+  useEffect(() => { scrollToBottom(); }, [messages]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // Load conversation history
   useEffect(() => {
     const loadHistory = async () => {
       if (!sessionId) return;
       try {
         const response = await getConversationHistory(sessionId);
-        if (response.success && response.history) {
-          setMessages(response.history);
-        }
+        if (response.success && response.history) setMessages(response.history);
       } catch (error) {
         console.error('Failed to load history:', error);
       } finally {
         setInitialLoading(false);
       }
     };
-
     loadHistory();
   }, [sessionId]);
 
-  // Handle send
+  const handleVoiceTranscript = (transcript) => setInput(transcript);
+
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
 
-    const userMessage = {
-      role: 'user',
-      content: input.trim(),
-      timestamp: new Date().toISOString(),
-    };
-
+    const userMessage = { role: 'user', content: input.trim(), timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setLoading(true);
@@ -64,41 +56,71 @@ const Chat = () => {
 
     try {
       const response = await sendMessage(sessionId, userMessage.content);
-
       if (response.success) {
         const aiMessage = {
-          role: 'assistant',
-          content: response.message,
-          timestamp: response.timestamp,
-        };
+  role: 'assistant',
+  content: typeof response.message === 'object'
+    ? response.message.message
+    : response.message,
+  language: response.message?.language || 'en',
+  timestamp: response.timestamp,
+};
+
         setMessages((prev) => [...prev, aiMessage]);
 
-        if (response.crisis && response.crisis.detected) {
-          setCrisisAlert(response.crisis);
+        if (response.detectedLanguage) {
+          setDetectedLanguages((prev) => {
+            const newLangs = [...prev, response.detectedLanguage];
+            return newLangs.slice(-5);
+          });
         }
+
+        if (response.crisis && response.crisis.detected) setCrisisAlert(response.crisis);
       }
     } catch (error) {
       console.error('Failed to send message:', error);
       setError('Failed to send message. Please try again.');
-
-      const fallbackMessage = {
-        role: 'assistant',
-        content:
-          "I'm having trouble connecting right now, but I'm here for you. Could you try sending your message again?",
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, fallbackMessage]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content:
+            "I'm having trouble connecting right now, but I'm here for you. Could you try sending your message again?",
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     } finally {
       setLoading(false);
       inputRef.current?.focus();
     }
   };
 
+  // ✅ Multi-language quick responses
   const quickResponses = [
-    "I'm feeling stressed about exams",
-    "I feel lonely",
-    "I'm worried about my future",
-    "I need someone to talk to",
+    {
+      en: "I'm feeling stressed about exams",
+      hi: "मुझे परीक्षाओं को लेकर तनाव है",
+      ta: "தேர்வுகளைப் பற்றி நான் மன அழுத்தத்தில் இருக்கிறேன்",
+      kn: "ಪರೀಕ್ಷೆಗಳ ಬಗ್ಗೆ ನನಗೆ ಒತ್ತಡವಾಗಿದೆ",
+      ml: "പരീക്ഷകളെ കുറിച്ച് എനിക്ക് സമ്മർദ്ദം അനുഭവപ്പെടുന്നു",
+      te: "పరీక్షల గురించి నాకు ఒత్తిడి గా అనిపిస్తోంది"
+    },
+    {
+      en: "I feel lonely",
+      hi: "मैं अकेला महसूस करता हूं",
+      ta: "நான் தனிமையாக உணர்கிறேன்",
+      kn: "ನಾನು ಒಂಟಿಯಾಗಿರುವಂತೆ ಭಾಸವಾಗುತ್ತದೆ",
+      ml: "എനിക്ക് ഏകാകിയായി തോന്നുന്നു",
+      te: "నాకు ఒంటరిగా అనిపిస్తోంది"
+    },
+    {
+      en: "I'm worried about my future",
+      hi: "मुझे अपने भविष्य की चिंता है",
+      ta: "எனது எதிர்காலத்தைப் பற்றி நான் கவலைப்படுகிறேன்",
+      kn: "ನನ್ನ ಭವಿಷ್ಯದ ಬಗ್ಗೆ ನನಗೆ ಚಿಂತೆಯಾಗಿದೆ",
+      ml: "എനിക്ക് എന്റെ ഭാവിയെ കുറിച്ച് ആശങ്കയുണ്ട്",
+      te: "నా భవిష్యత్తు గురించి నాకు ఆందోళనగా ఉంది"
+    },
   ];
 
   const handleQuickResponse = (text) => {
@@ -117,6 +139,17 @@ const Chat = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-300">
       <div className="flex-1 container mx-auto px-4 py-6 max-w-4xl">
+        {/* Language Indicator */}
+        {detectedLanguages.length > 0 && (
+          <div className="mb-4 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/30 rounded-full">
+              <span className="text-sm text-blue-700 dark:text-blue-300">
+                🌐 Multi-language chat active • Speak or type in any language
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Welcome Message */}
         {messages.length === 0 && (
           <div className="text-center py-12">
@@ -127,21 +160,21 @@ const Chat = () => {
               Welcome to Your Safe Space
             </h2>
             <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto mb-8">
-              This is a judgment-free zone. Share what's on your mind, and I'll
-              listen with empathy and understanding. Your conversation is completely anonymous.
+              This is a judgment-free zone. Share what's on your mind in <strong>English, Hindi, Tamil, Telugu, Kannada or Malayalam</strong>.
+              I'll respond in the same language. Your conversation is completely anonymous.
             </p>
 
             {/* Quick Responses */}
             <div className="max-w-2xl mx-auto">
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Try starting with:</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-3">
                 {quickResponses.map((response, index) => (
                   <button
                     key={index}
-                    onClick={() => handleQuickResponse(response)}
-                    className="px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition text-left text-gray-700 dark:text-gray-200"
+                    onClick={() => handleQuickResponse(response[selectedLang])} // ✅ Use selected language
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition text-sm"
                   >
-                    {response}
+                    {response[selectedLang] || response.en}
                   </button>
                 ))}
               </div>
@@ -151,10 +184,7 @@ const Chat = () => {
 
         {/* Crisis Alert */}
         {crisisAlert && (
-          <CrisisAlert
-            crisisData={crisisAlert}
-            onClose={() => setCrisisAlert(null)}
-          />
+          <CrisisAlert crisisData={crisisAlert} onClose={() => setCrisisAlert(null)} />
         )}
 
         {/* Messages */}
@@ -175,7 +205,6 @@ const Chat = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
             <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
@@ -184,32 +213,59 @@ const Chat = () => {
       </div>
 
       {/* Input Area */}
-      <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 shadow-lg transition-colors duration-300">
-        <div className="container mx-auto px-4 py-4 max-w-4xl">
-          <form onSubmit={handleSend} className="flex gap-3">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message here..."
-              className="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:border-blue-500 transition"
-              disabled={loading}
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || loading}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg focus:ring-2 focus:ring-blue-400 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              <Send size={20} className="inline mr-2" />
-              Send
-            </button>
-          </form>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
-            Press Enter to send • Your conversation is completely anonymous
-          </p>
+<div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 shadow-lg transition-colors duration-300">
+  <div className="container mx-auto px-4 py-4 max-w-4xl">
+    <form onSubmit={handleSend} className="flex gap-3 items-end flex-wrap sm:flex-nowrap">
+
+      {/* 🎤 Voice Input */}
+      <div className="flex items-center gap-2">
+        <VoiceInput onTranscript={handleVoiceTranscript} disabled={loading} />
+
+        {/* 🌍 Language Dropdown (Moved Here) */}
+        <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-2 py-1">
+          <Globe size={16} className="text-blue-500" />
+          <select
+            value={selectedLang}
+            onChange={(e) => setSelectedLang(e.target.value)}
+            className="bg-transparent text-sm text-gray-700 dark:text-gray-200 focus:outline-none"
+          >
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="kn">Kannada</option>
+            <option value="ml">Malayalam</option>
+          </select>
         </div>
       </div>
+
+      {/* ✏️ Text Input */}
+      <input
+        ref={inputRef}
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder={`Type in ${selectedLang === 'en' ? 'English' :
+          selectedLang === 'hi' ? 'Hindi' :
+          selectedLang === 'ta' ? 'Tamil' :
+          selectedLang === 'te' ? 'Telugu' :
+          selectedLang === 'kn' ? 'Kannada' : 'Malayalam'}...`}
+        className="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:border-blue-500 transition"
+        disabled={loading}
+      />
+
+      {/* 🚀 Send Button */}
+      <Button type="submit" disabled={!input.trim() || loading} icon={<Send size={20} />}>
+        Send
+      </Button>
+    </form>
+
+    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+      🎤 Speak or type in any supported language • Your chat is private and safe
+    </p>
+  </div>
+</div>
+
     </div>
   );
 };

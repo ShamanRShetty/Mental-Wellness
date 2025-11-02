@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { MessageCircle, Shield, Heart, Clock, Users, Brain, AlertTriangle, Phone } from 'lucide-react';
 import Button from '../components/UI/Button';
 import DailyAffirmation from '../components/Home/DailyAffirmation';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
+  const { t } = useTranslation();
   const features = [
     {
       icon: MessageCircle,
@@ -132,7 +134,7 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
-              Why Choose MindCare?
+              Why Choose MindMirror?
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Designed specifically for Indian youth facing academic pressure, 

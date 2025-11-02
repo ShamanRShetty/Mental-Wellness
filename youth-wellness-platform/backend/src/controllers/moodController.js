@@ -1,7 +1,7 @@
 const Session = require('../models/Session');
 const { generateSessionId, isValidSessionId } = require('../utils/sessionUtils');
 const { analyzeSentimentTrend } = require('../services/sentimentService');
-const { generateAIResponse } = require('../services/aiService');
+const { generateAIResponse } = require('../services/geminiService');
 
 /**
  * Log a mood entry
@@ -269,9 +269,8 @@ function calculateMoodStatistics(moodEntries) {
 async function generateMoodInsights(moodEntries) {
   const stats = calculateMoodStatistics(moodEntries);
 
-  // Create a summary for AI to analyze
-  const recentEntries = moodEntries.slice(-7); // Last 7 entries
-  const summary = recentEntries.map(e => 
+  const recentEntries = moodEntries.slice(-7);
+  const summary = recentEntries.map(e =>
     `${e.mood} (intensity: ${e.intensity}) - ${e.note || 'no note'}`
   ).join('\n');
 
@@ -294,18 +293,19 @@ Be warm and encouraging, not clinical.`;
 
     return {
       statistics: stats,
-      aiAnalysis: aiInsights,
+      aiAnalysis: aiInsights || "You're showing a consistent emotional pattern. Keep expressing and tracking how you feel — you're doing great!",
       recommendations: generateRecommendations(stats)
     };
   } catch (error) {
     console.error('Generate Insights Error:', error);
     return {
       statistics: stats,
-      aiAnalysis: null,
+      aiAnalysis: "Couldn't generate AI insights right now, but you're doing a great job keeping track of your emotions!",
       recommendations: generateRecommendations(stats)
     };
   }
 }
+
 
 /**
  * Helper: Generate recommendations based on mood patterns

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import Logo from '../UI/Logo';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -55,12 +56,10 @@ const Header = () => {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <Heart className="text-blue-600 dark:text-blue-400" size={32} />
-            <span className="text-xl font-bold text-gray-800 dark:text-gray-100">
-              Reflect&Track
-            </span>
-          </Link>
+          <Link to="/" className="flex items-center">
+  <Logo/>
+</Link>
+        
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">

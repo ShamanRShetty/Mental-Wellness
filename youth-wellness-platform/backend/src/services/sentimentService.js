@@ -1,3 +1,5 @@
+const { analyzeWithCloudNLP } = require('./cloudNLPService');
+
 /**
  * Basic sentiment analysis
  * (We'll replace this with Google Cloud NLP API later)
@@ -21,7 +23,14 @@ const NEGATIVE_WORDS = [
  * @param {string} text - Message to analyze
  * @returns {Object} - Sentiment analysis result
  */
-function analyzeSentiment(text) {
+async function analyzeSentiment(text) {
+  // Try Cloud NLP first
+  const cloudResult = await analyzeWithCloudNLP(text);
+  if (cloudResult) {
+    return cloudResult;
+  }
+
+  // Fall back to basic sentiment (existing code)
   const lowerText = text.toLowerCase();
   const words = lowerText.split(/\s+/);
 
@@ -62,7 +71,8 @@ function analyzeSentiment(text) {
     sentiment, // 'positive', 'negative', 'neutral', etc.
     positiveCount,
     negativeCount,
-    confidence: Math.abs(score) // How confident we are
+    confidence: Math.abs(score), // How confident we are
+    usedCloudNLP: false, // flag for fallback usage
   };
 }
 
@@ -115,6 +125,6 @@ function analyzeSentimentTrend(messages) {
 }
 
 module.exports = {
-  analyzeSentiment,
+  analyzeSentiment, // now async
   analyzeSentimentTrend
 };

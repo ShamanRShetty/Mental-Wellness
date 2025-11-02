@@ -275,32 +275,52 @@ const MoodTracker = () => {
             {moodHistory.length > 0 && <MoodChart moodEntries={moodHistory} />}
 
             {/* Insights */}
-            {moodHistory.length >= 3 && insights?.aiAnalysis && (
+            {moodHistory.length >= 3 &&  (
               <Card>
-                <div className="flex items-center gap-3 mb-4">
-                  <Brain className="text-purple-600" size={24} />
-                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                    AI Insights
-                  </h3>
-                </div>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-                  {insights.aiAnalysis}
-                </p>
-                {insights.recommendations?.length > 0 && (
-                  <div className="space-y-2">
-                    {insights.recommendations.map((rec, i) => (
-                      <div
-                        key={i}
-                        className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3"
-                      >
-                        <p className="text-sm text-blue-800 dark:text-blue-300">
-                          {rec.message}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
+    <div className="flex items-center gap-3 mb-4">
+      <Brain className="text-purple-600" size={24} />
+      <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+        AI Insights
+      </h3>
+    </div>
+
+    {/* Safely render aiAnalysis */}
+    <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+      {typeof insights?.aiAnalysis === 'string'
+        ? insights.aiAnalysis
+        : insights?.aiAnalysis?.message || "No insights available yet — keep tracking your moods!"}
+    </p>
+
+    {/* Safely render recommendations */}
+    {Array.isArray(insights?.recommendations) && insights.recommendations.length > 0 && (
+      <div className="mt-4 space-y-2">
+        <h3 className="font-semibold text-lg text-blue-700 dark:text-blue-300">
+          AI Recommendations:
+        </h3>
+
+        {insights.recommendations.map((rec, i) => {
+          // ✅ Handle both string or object safely
+          const message =
+            typeof rec === 'string'
+              ? rec
+              : rec?.message ||
+                rec?.text ||
+                JSON.stringify(rec);
+
+          return (
+            <div
+              key={i}
+              className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3"
+            >
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                {message}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </Card>
             )}
 
             {/* Statistics */}

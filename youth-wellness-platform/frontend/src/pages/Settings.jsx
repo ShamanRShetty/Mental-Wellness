@@ -18,17 +18,40 @@ const Settings = () => {
   };
 
   const handleResetSession = async () => {
-    try {
-      await resetSession();
-      clearSessionId();
-      setResetSuccess(true);
-      setShowResetConfirm(false);
-      setTimeout(() => navigate('/'), 2000);
-    } catch (error) {
-      console.error('Failed to reset session:', error);
-      alert('Failed to reset session. Please try again.');
+  try {
+    // Confirm reset action
+    if (!window.confirm("Are you sure you want to reset all your data? This cannot be undone.")) {
+      return;
     }
-  };
+
+    // 🧹 Clear localStorage (all app data)
+    localStorage.removeItem('moodLogs');
+    localStorage.removeItem('moodInsights');
+    localStorage.removeItem('sessionId');
+    localStorage.removeItem('preferences');
+
+    // Optionally: clear everything
+    // localStorage.clear();
+
+    // 🧠 Reset app session
+    await resetSession();
+    clearSessionId();
+
+    // ✅ Show success + redirect
+    setResetSuccess(true);
+    setShowResetConfirm(false);
+
+    // Small delay to show alert before redirect
+    setTimeout(() => {
+      window.location.reload(); // ensures full reset
+      navigate('/');
+    }, 1500);
+  } catch (error) {
+    console.error('Failed to reset session:', error);
+    alert('Failed to reset session. Please try again.');
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 transition-colors duration-300">
@@ -39,7 +62,7 @@ const Settings = () => {
             Settings
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Customize your MindCare experience
+            Customize your MindMirror experience
           </p>
         </div>
 
@@ -78,49 +101,6 @@ const Settings = () => {
               </div>
             </div>
           </Card>
-
-          {/* Language Settings */}
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-3 mb-4">
-              <Globe className="text-green-600 dark:text-green-400" size={24} />
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                Language
-              </h2>
-            </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Choose your preferred language for the app
-            </p>
-            <div className="space-y-3">
-              {[
-                { code: 'en', name: 'English' },
-                { code: 'hi', name: 'हिंदी (Hindi)' },
-                { code: 'ta', name: 'தமிழ் (Tamil)' },
-              ].map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => handleLanguageChange(lang.code)}
-                  className={`w-full text-left px-4 py-3 border-2 rounded-lg transition-colors ${
-                    preferences.language === lang.code
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                >
-                  <span className="font-medium text-gray-800 dark:text-gray-200">
-                    {lang.name}
-                  </span>
-                  {preferences.language === lang.code && (
-                    <span className="ml-2 text-blue-600 dark:text-blue-400 text-sm">
-                      ✓ Active
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-              Note: Full multi-language support coming soon
-            </p>
-          </Card>
-
           {/* Theme Settings */}
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3 mb-4">
@@ -214,10 +194,10 @@ const Settings = () => {
           {/* About */}
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
-              About MindCare
+              About MindMirror
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              MindCare is a mental wellness platform designed specifically for Indian youth, built with empathy and cultural awareness.
+              MindMirror is a mental wellness platform designed specifically for Indian youth, built with empathy and cultural awareness.
             </p>
             <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
               <p>Version: 1.0.0</p>

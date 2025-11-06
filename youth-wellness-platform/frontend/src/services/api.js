@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getSessionId } from "../utils/storage";
 
-const API_BASE_URL = "http://localhost:8080/api";
+const API_BASE_URL = "https://mental-wellness-xpts.onrender.com";
 
 // Create axios instance with default config
 const api = axios.create({

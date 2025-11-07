@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../src/assets/logo.png'; // ✅ adjust the path to your image
+import logo from '../src/assets/Logo.png'; // ✅ adjust the path to your image
 
 const Logo = ({ size = 'md', showText = true }) => {
   const sizes = {

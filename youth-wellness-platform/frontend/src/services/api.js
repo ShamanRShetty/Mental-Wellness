@@ -1,22 +1,15 @@
 import axios from "axios";
 import { getSessionId } from "../utils/storage";
 
-// Dynamically set API base URL
-// On Netlify → uses VITE_API_BASE_URL from environment variable
-// Locally → defaults to localhost for testing
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-// Create axios instance with default config
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 10000, // 10 seconds
+  baseURL: `${API_BASE_URL}/api`,
+  headers: { "Content-Type": "application/json" },
+  timeout: 10000,
 });
 
-// Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -24,6 +17,7 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 // ============================================
 // CHAT ENDPOINTS

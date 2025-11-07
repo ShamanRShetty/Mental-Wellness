@@ -1,7 +1,11 @@
 import axios from "axios";
 import { getSessionId } from "../utils/storage";
 
-const API_BASE_URL = "https://mental-wellness-xpts.onrender.com";
+// Dynamically set API base URL
+// On Netlify → uses VITE_API_BASE_URL from environment variable
+// Locally → defaults to localhost for testing
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 // Create axios instance with default config
 const api = axios.create({
@@ -61,12 +65,9 @@ export const clearHistory = async (sessionId) => {
 };
 
 // ============================================
-// MOOD ENDPOINTS (✅ Corrected)
+// MOOD ENDPOINTS
 // ============================================
 
-/**
- * Log a mood entry
- */
 export const logMood = async (data) => {
   const sessionId = getSessionId();
   if (!sessionId) throw new Error("Session ID missing — please refresh.");
@@ -84,9 +85,6 @@ export const logMood = async (data) => {
   return response.data;
 };
 
-/**
- * Get mood history
- */
 export const getMoodHistory = async (days = 7) => {
   const sessionId = getSessionId();
   if (!sessionId) throw new Error("Session ID missing — please refresh.");
@@ -95,9 +93,6 @@ export const getMoodHistory = async (days = 7) => {
   return response.data;
 };
 
-/**
- * Get mood insights
- */
 export const getMoodInsights = async () => {
   const sessionId = getSessionId();
   if (!sessionId) throw new Error("Session ID missing — please refresh.");
@@ -110,45 +105,30 @@ export const getMoodInsights = async () => {
 // RESOURCE ENDPOINTS
 // ============================================
 
-/**
- * Get all resources with optional filters
- */
 export const getResources = async (filters = {}) => {
   const response = await api.get("/resources", { params: filters });
   return response.data;
 };
 
-/**
- * Get a single resource
- */
 export const getResourceById = async (id) => {
   const response = await api.get(`/resources/${id}`);
   return response.data;
 };
 
-/**
- * Mark resource as helpful
- */
 export const markResourceHelpful = async (id) => {
   const response = await api.post(`/resources/${id}/helpful`);
   return response.data;
 };
 
-/**
- * Get emergency helplines
- */
 export const getEmergencyHelplines = async () => {
   const response = await api.get("/resources/emergency/helplines");
   return response.data;
 };
 
 // ============================================
-// JOURNAL ENDPOINTS (🆕 Added)
+// JOURNAL ENDPOINTS
 // ============================================
 
-/**
- * Create a journal entry
- */
 export const createJournalEntry = async (entryData) => {
   const sessionId = getSessionId();
   if (!sessionId) throw new Error("Session ID missing — please refresh.");
@@ -158,9 +138,6 @@ export const createJournalEntry = async (entryData) => {
   return response.data;
 };
 
-/**
- * Get all journal entries
- */
 export const getJournalEntries = async (limit = 10, skip = 0) => {
   const sessionId = getSessionId();
   if (!sessionId) throw new Error("Session ID missing — please refresh.");
@@ -170,33 +147,21 @@ export const getJournalEntries = async (limit = 10, skip = 0) => {
   return response.data;
 };
 
-/**
- * Get single journal entry
- */
 export const getJournalEntry = async (id) => {
   const response = await api.get(`/journal/entry/${id}`);
   return response.data;
 };
 
-/**
- * Update journal entry
- */
 export const updateJournalEntry = async (id, updates) => {
   const response = await api.put(`/journal/${id}`, updates);
   return response.data;
 };
 
-/**
- * Delete journal entry
- */
 export const deleteJournalEntry = async (id) => {
   const response = await api.delete(`/journal/${id}`);
   return response.data;
 };
 
-/**
- * Get random journal prompts
- */
 export const getJournalPrompts = async () => {
   const response = await api.get("/journal/prompts/random");
   return response.data;

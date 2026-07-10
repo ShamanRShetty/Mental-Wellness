@@ -1,4 +1,4 @@
-# Youth Wellness Platform
+# MindMirror -- Youth Wellness Platform
 
 An AI-powered mental wellness platform for youth, offering an empathetic chat companion, mood tracking, private journaling, curated support resources, and crisis detection with multilingual support (English/Hindi).
 

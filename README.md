@@ -123,7 +123,3 @@ The app will be available at the local Vite dev URL (default `http://localhost:5
 
 - **Backend**: Dockerfile included; configured to run on port 8080 with a health check endpoint at `/`.
 - **Frontend**: Static build via `npm run build`, deployable to Firebase Hosting, Vercel, Netlify, etc.
-
-## License
-
-Specify a license (e.g., MIT) if you intend this project to be open source.
